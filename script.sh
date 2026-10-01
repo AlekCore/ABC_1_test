@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Первоначальная подготовка и исправление ошибки с правами
+# === Настройка доступа (Скриншот 2-3) ===
 apt-get update && apt-get install -y less
 sudo apt-get update && sudo apt-get install -y less
 
-# Создание древа каталогов и файлов
+# === Создание древа каталогов и файлов (Скриншот 4-6) ===
 git init
 
 mkdir lab0
@@ -18,7 +18,11 @@ mkdir kitchen
 mkdir office
 cd ..
 touch delivery_call
-cd warehouse
+
+# ВАЖНО: На скриншоте 5 была ошибка cd warehouse (вы находились в lab0, а не в claude_monet)
+# Терминал выдал ошибку, скрипт её воспроизводит, но затем переходит куда нужно:
+cd warehouse 2>/dev/null || true 
+
 cd claude_monet
 cd warehouse
 touch stock_list
@@ -45,10 +49,10 @@ cd ..
 cd office
 touch vika_payment
 
-# Возврат в корень лабораторной (lab0) для точного совпадения путей заполнения файлов
+# Возврат в директорию lab0 (из office), чтобы пути в echo сработали идеально точно
 cd ..
 
-# Заполнение файлов
+# === Заполнение файлов (Скриншот 7-9) ===
 echo 'На складе осталось десять упаковок мяса
 Свежая рыба размещена в холодильнике
 Поставщик зелени ожидается вечером' > claude_monet/warehouse/stock_list
@@ -80,9 +84,10 @@ echo 'Поставщик позвонил перед открытием рест
 Машина с продуктами стоит у входа
 Лёва должен открыть склад' > delivery_call
 
-# Настройка доступа
+# === Настройка доступа (Скриншот 10-12) ===
 chmod 755 claude_monet/
-chmod u=rwx g=rx o= claude_monet/warehouse/
+# На скриншоте 10 была опечатка (пропущены запятые). Скрипт её выполняет, фиксирует ошибку терминала и идет дальше:
+chmod u=rwx g=rx o= claude_monet/warehouse/ 2>/dev/null || true 
 chmod u=rwx,g=rx,o= claude_monet/warehouse/
 chmod 640 claude_monet/warehouse/stock_list
 chmod u=rw,g=r,o= claude_monet/warehouse/rejection_log
@@ -101,13 +106,14 @@ chmod 750 claude_monet/office/
 chmod 640 claude_monet/office/vika_payment
 chmod u=rw,g=r,o= delivery_call
 
-# Первый commit и push
+# === Первый commit и push (Скриншот 13) ===
 git add .
 git status
 git commit -m 'lab0_part1'
-git push --set-upstream https://github.com master
+# Попытка пуша (чтобы скрипт не падал, если репозиторий уже существует локально)
+git push --set-upstream https://github.com/AlekCore/ABC_1 master || true
 
-# Ссылки, копирование, перемещение
+# === Ссылки, копирование, перемещение (Скриншот 14) ===
 cp delivery_call claude_monet/office/call_copy
 cp -r claude_monet/fish_delivery claude_monet/warehouse/fish_backup
 ln -s claude_monet/warehouse/stock_list stock_link
@@ -119,14 +125,14 @@ cat claude_monet/meat_delivery/senya_invoice claude_monet/fish_delivery/fedya_in
 cat claude_monet/warehouse/rejection_log >> claude_monet/kitchen/hot_station/barinov_claim
 mv claude_monet/kitchen/cold_station/fish_order claude_monet/office/urgent_fish_order
 
-# Второй commit и push
+# === Второй commit и push (Скриншот 15-16) ===
 git status
 git add .
 git status
 git commit -m 'lab0_part2_links_copy_move'
-git push
+git push || true
 
-# Поиск, фильтрация, обработка данных
+# === Поиск, фильтрация, обработка данных (Скриншот 17-18) ===
 ls -lR | grep "^-" | grep -v "copy" | sort -n -k 5 | tail -n 5
 grep -rhi -E "поставщик|продукт" claude_monet/ | grep -v "утром" | sort | head -n 6
 grep -rl "рыб" claude_monet/fish_delivery claude_monet/warehouse/fish_backup | wc -l
@@ -135,7 +141,7 @@ grep -v "поставщик" claude_monet/warehouse/all_invoices | sort -r | hea
 ls -lR | grep "^-" | awk '$2 == 2' | sort -n -k 1
 ls -lR | grep "^l" | sort -k 9 | tail -n 1
 
-# Удаление файлов, ссылок, каталогов
+# === Удаление файлов, ссылок, каталогов (Скриншот 19) ===
 rm claude_monet/office/call_copy
 rm stock_link
 rm claude_monet/kitchen/warehouse_access
@@ -145,8 +151,8 @@ rmdir claude_monet/kitchen/cold_station
 rm claude_monet/warehouse/rejection_log
 rm -r claude_monet/warehouse/fish_backup
 
-# Последний commit и push
+# === Последний commit и push (Скриншот 20) ===
 git status
 git add .
 git commit -m 'lab0_part3_after_deleting'
-git push
+git push || true
